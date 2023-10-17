@@ -12,6 +12,7 @@ import loadData from "./load-data";
 import loadPresets from "./load-presets";
 import loadSettings from "./load-settings";
 import { loadPermissions } from "./load-public-permissions";
+import clearRequiredFields from "./clear-required-fields";
 
 export default async function apply(dir: string, cli: any) {
   // Get the source directory for the actual files
@@ -20,6 +21,8 @@ export default async function apply(dir: string, cli: any) {
   // Load the template files into the destination
   await loadSchema(source + "/schema");
   cli.log("Loaded Schema");
+  await clearRequiredFields();
+  cli.log("Made all fields optional");
   await loadRoles(readFile("roles", source));
   cli.log("Loaded Roles");
   await loadFiles(readFile("files", source), source); // Comes after folders
@@ -46,4 +49,7 @@ export default async function apply(dir: string, cli: any) {
   await loadPermissions(readFile("permissions", source));
   cli.log("Loaded Permissions");
   return {};
+}
+function clearReqiuredFields() {
+  throw new Error("Function not implemented.");
 }
