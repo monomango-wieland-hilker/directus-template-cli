@@ -48,15 +48,13 @@ export default async function extract(dir: string, cli: any) {
   await extractFiles(destination);
   await extractPresets(destination);
   await extractPermissions(destination);
-  await extractPermissions(destination);
-
   // Iterate through the endpoints
   for (const endpoint of endpoints) {
     await extractFromEndpoint(endpoint, destination);
   }
 
   // Extract public permissions
-  await extractPublicPermissions(destination);
+  // await extractPublicPermissions(destination);
 
   // Extract content
   await extractContent(destination);

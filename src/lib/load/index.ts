@@ -11,23 +11,27 @@ import loadOperations from "./load-operations";
 import loadData from "./load-data";
 import loadPresets from "./load-presets";
 import loadSettings from "./load-settings";
-import { loadPermissions } from "./load-public-permissions";
-import clearRequiredFields from "./clear-required-fields";
-
+import { loadPermissions } from "./load-permissions";
+import { api } from "../api";
 export default async function apply(dir: string, cli: any) {
   // Get the source directory for the actual files
   const source = dir + "/src";
-
   // Load the template files into the destination
   await loadSchema(source + "/schema");
   cli.log("Loaded Schema");
-  await clearRequiredFields();
-  cli.log("Made all fields optional");
-  await loadRoles(readFile("roles", source));
+  const roles = readFile("roles", source);
+  const legacyAdminRoleID = roles.find(
+    (role) => role.name === "Administrator"
+  ).id;
+  cli.log("Found legacy id", legacyAdminRoleID);
+  const me = await api.get<any>(`/users/me`);
+  const newAdminRoleID = me.data.data.role;
+  cli.log("new admin role id", newAdminRoleID);
+  await loadRoles(roles);
   cli.log("Loaded Roles");
   await loadFiles(readFile("files", source), source); // Comes after folders
   cli.log("Loaded Files");
-  await loadUsers(readFile("users", source)); // Comes after roles, files
+  await loadUsers(readFile("users", source), legacyAdminRoleID, newAdminRoleID); // Comes after roles, files
   cli.log("Loaded Users");
   await loadFolders(source);
   cli.log("Loaded Folders");
@@ -46,10 +50,8 @@ export default async function apply(dir: string, cli: any) {
   cli.log("Loaded Presets");
   await loadSettings(readFile("settings", source));
   cli.log("Loaded Settings");
-  await loadPermissions(readFile("permissions", source));
+  const permissionsFile = readFile("permissions", source);
+  await loadPermissions(permissionsFile, legacyAdminRoleID, newAdminRoleID);
   cli.log("Loaded Permissions");
   return {};
-}
-function clearReqiuredFields() {
-  throw new Error("Function not implemented.");
 }

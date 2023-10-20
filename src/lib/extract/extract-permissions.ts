@@ -27,7 +27,6 @@ export async function extractPermissions(dir: string) {
     const { data }: { data: any } = await api.get("permissions", {
       params: {
         limit: "-1",
-        "filter[role][_null]": true,
       },
     });
 
